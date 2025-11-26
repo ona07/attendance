@@ -24,6 +24,14 @@ function doPost(e) {
 function jsonResponse(obj) {
   const output = ContentService.createTextOutput(JSON.stringify(obj));
   output.setMimeType(ContentService.MimeType.JSON);
+  // 念のためCORSヘッダーも明示
+  try {
+    output.setHeader('Access-Control-Allow-Origin', '*');
+    output.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    output.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  } catch (e) {
+    // 古いランタイムでsetHeaderが使えない場合は無視
+  }
   return output;
 }
 

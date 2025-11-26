@@ -13,7 +13,8 @@ async function send(endpoint) {
   try {
     const res = await fetch(`${GAS_BASE_URL}/${endpoint}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // text/plain にしてプリフライト(OPTIONS)を回避
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ client: 'github-pages' })
     });
 
