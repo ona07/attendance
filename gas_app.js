@@ -90,9 +90,10 @@ function renderApp() {
     }
 
     .container {
-      width: min(1000px, calc(100% - 48px));
+      width: min(980px, 100%);
       max-width: 100%;
       margin: 0 auto;
+      padding: 0 12px;
       display: grid;
       gap: 18px;
     }
@@ -131,7 +132,7 @@ function renderApp() {
 
     .actions {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
       gap: 12px;
     }
 
@@ -226,9 +227,29 @@ function renderApp() {
     }
 
     @media (max-width: 640px) {
-      body { padding: 16px; }
+      body {
+        padding: 16px 12px 24px;
+        align-items: flex-start;
+      }
+      .container { width: 100%; }
       header h1 { font-size: 22px; }
-      .timeline li { grid-template-columns: 70px 1fr; }
+      .status-text {
+        text-align: left;
+        width: 100%;
+      }
+      .actions {
+        grid-template-columns: 1fr;
+      }
+      .stats {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+      .timeline li {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        align-items: flex-start;
+      }
+      .timeline-time { font-size: 13px; }
+      .timeline-label { font-size: 15px; }
     }
   </style>
 </head>
