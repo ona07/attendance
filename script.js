@@ -1,5 +1,5 @@
 ﻿// フロントエンド側設定：GASのデプロイURLを差し替えて使用する
-const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbzhTizLfyhTfCN3XOs_Q90j1FG_F5qkSUR-WovyTmBF3SWP8JSDnCmaYD87IAIOfCtaUA/exec'; // 例: https://script.google.com/macros/s/XXXX/exec
+const GAS_BASE_URL = 'https://script.google.com/macros/s/AKfycbw9iVTz9NumNqdQ3JajsF1M_bOoY14zEVU1tAJ5LQ1Mv5crVOA-PczzeSANXvyuG8QHqA/exec'; // 例: https://script.google.com/macros/s/XXXX/exec
 
 const statusText = document.getElementById('statusText');
 const commentEl = document.getElementById('comment');
