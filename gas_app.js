@@ -30,6 +30,7 @@ function doPost(e) {
     if (path === 'checkout') return jsonResponse(handleCheckOut());
     if (path === 'break-start') return jsonResponse(handleBreakStart());
     if (path === 'break-end') return jsonResponse(handleBreakEnd());
+    if (path === 'status') return jsonResponse(handleStatus());
     return jsonResponse({ ok: false, error: '不正なパス', path });
   } catch (err) {
     return jsonResponse({ ok: false, error: err.message, stack: err.stack });
@@ -319,6 +320,8 @@ function renderApp() {
     const timelineEl = document.getElementById('timeline');
     updateButtons('未出勤');
     renderTimeline([]);
+    // 初回に最新状態を取得
+    send('status');
 
     async function send(endpoint) {
       setStatus('通信中...');
@@ -342,6 +345,7 @@ function renderApp() {
       if (endpoint === 'checkout') runner.handleCheckOut();
       if (endpoint === 'break-start') runner.handleBreakStart();
       if (endpoint === 'break-end') runner.handleBreakEnd();
+      if (endpoint === 'status') runner.handleStatus();
     }
 
     function setStatus(text) {
@@ -508,6 +512,42 @@ function handleCheckOut() {
   const summary = summarize(cfg, refreshed);
   summary.aiComment = aiText;
   summary.message = '退勤を記録しました';
+  return { ok: true, pageId: page.id, ...summary };
+}
+
+// ステータス取得（ページを作成せずに現在の状態を返す）
+function handleStatus() {
+  const cfg = getConfig();
+  const today = Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd');
+  const page = findPageByDate(cfg, today);
+  if (!page) {
+    const emptyState = {
+      pageId: null,
+      checkIn: null,
+      checkOut: null,
+      breakStart: null,
+      breakEnd: null,
+      breakMinutes: 0,
+      workHours: 0,
+      timeline: [],
+      aiComment: ''
+    };
+    const summary = {
+      status: '未出勤',
+      netHours: 0,
+      breakMinutes: 0,
+      weekHours: getWeekHours(cfg),
+      timeline: [],
+      aiComment: ''
+    };
+    return { ok: true, ...emptyState, ...summary };
+  }
+
+  // 既存ページがある場合のみ休憩等のプロパティを要求
+  assertProps(page, [PROPS.breakStart, PROPS.breakEnd, PROPS.breakMinutes, PROPS.timeline, PROPS.workHours]);
+  const state = parseState(page);
+  const summary = summarize(cfg, state);
+  summary.message = '最新状態を取得しました';
   return { ok: true, pageId: page.id, ...summary };
 }
 
