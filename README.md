@@ -1,22 +1,27 @@
-# AI勤怠管理 (GAS構成)
+# AI勤怠管理 (GASのみでホスト)
 
-GitHub Pagesなどの静的ホスティング上のフロントエンドと、Google Apps Script (GAS) をバックエンドにしたシンプルな勤怠送信ツールです。NotionのDBに出退勤とAIコメントを保存します。
+フロントエンドもバックエンドもGoogle Apps Script内で完結させる構成です。`doGet` がHTML/CSS/JSを返し、`doPost` が Notion + OpenAI への書き込み・コメント生成を行います。同一オリジンになるためCORS問題を回避できます。
 
-## フロントエンド
-- `script.js` の `GAS_BASE_URL` を、デプロイしたGASのウェブアプリURL（`.../exec` ではなく、googleusercontent.comの長いURL）に差し替えてください。
-- ボタン: `出勤` (`/checkin`)、`退勤` (`/checkout`) のPOSTを送ります。
+## セットアップ
+1) `gas_app.js` をGASプロジェクトに貼り付ける。
+2) スクリプトプロパティを設定:
+   - `NOTION_SECRET`
+   - `NOTION_DATABASE_ID`
+   - `OPENAI_API_KEY`
+3) デプロイ → 新しいデプロイ → 種類「ウェブアプリ」
+   - 実行するユーザー: 自分
+   - アクセスできるユーザー: 全員（組織ポリシーで匿名が選べない場合は「全員」でも可。同一オリジンなのでCORSは発生しません）
+4) デプロイ後のウェブアプリURL（`https://script.google.com/macros/s/.../exec`）にアクセスすると画面が表示されます。
+   - `health` エンドポイント: `.../exec/health` で `{ ok: true }` を返します。
 
-## GAS側のポイント
-- `gas_app.js` をGASに貼り付けてデプロイ（新しいデプロイ→ウェブアプリ）。
-- スクリプトプロパティに以下を設定:
-  - `NOTION_SECRET`
-  - `NOTION_DATABASE_ID`
-  - `OPENAI_API_KEY`
-- 公開設定は「全員（匿名ユーザー含む）」を選択し、デプロイ後に表示される `googleusercontent.com` のURLをフロント側に設定。
+## 画面・API挙動
+- ボタン `出勤` → `POST /checkin`
+- ボタン `退勤` → `POST /checkout`
+- 返却データのメッセージとAIコメントを画面に表示し、レスポンスJSONをログ欄に表示します。
 
 ## Notionデータベース
-- プロパティ例: `Date` (date), `Check-in` (date), `Check-out` (date), `Work Hours` (number), `AI Comment` (rich text)。
-
-## よくあるエラー
-- CORS/403: ウェブアプリの公開範囲が「全員（匿名）」になっているか確認。
-- 404やERR_FAILED: `GAS_BASE_URL` に `.../exec` の代わりに `googleusercontent.com/.../exec` を使っているか確認。
+- 必須プロパティ
+  - `Date` (date), `Check-in` (date), `Check-out` (date), `Work Hours` (number), `AI Comment` (rich text), `Title` (title)
+  - 休憩管理用: `Break Start` (date), `Break End` (date), `Break Minutes` (number), `Timeline` (rich text)
+- `Title` が空のページは自動で `${date} 出退勤` をセットします。
+- `Work Hours` には休憩を差し引いた実働時間(時間)を保存します。`Break Minutes` には休憩累計(分)を保存します。`Timeline` には当日のイベント履歴(JSON文字列)を保存します。
